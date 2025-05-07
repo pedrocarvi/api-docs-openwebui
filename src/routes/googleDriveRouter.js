@@ -10,7 +10,8 @@ const router = express.Router();
 const {
   getGoogleDriveFiles,
   googleAuthUrl,
-  googleAuthCallback
+  googleAuthCallback,
+  googleLogout
 } = require('../controllers/googleDriveController');
 
 /**
@@ -76,5 +77,20 @@ router.get('/auth/google/callback', googleAuthCallback);
  *         description: Error al obtener archivos de Google Drive
  */
 router.get('/files', getGoogleDriveFiles);
+
+/**
+ * @swagger
+ * /googleDrive/logout:
+ *   post:
+ *     tags:
+ *       - Google Drive
+ *     summary: Revoca credenciales y desconecta la sesión de Google Drive
+ *     responses:
+ *       '200':
+ *         description: Desconexión exitosa de Google Drive
+ *       '500':
+ *         description: Error al desconectar de Google Drive
+ */
+router.post('/logout', googleLogout);
 
 module.exports = router;

@@ -29,6 +29,8 @@ app.use('/archivos', archivosRouter);
 app.use('/basesConocimiento', basesConocimientoRouter)
 app.use('/googleDrive', googleDriveRouter)
 
+require('./cron/syncFiles');
+
 app.listen(PORT, () => {
   console.log(`Servidor escuchando en puerto ${PORT}`);
 });
