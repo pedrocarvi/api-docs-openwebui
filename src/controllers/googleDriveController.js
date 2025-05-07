@@ -63,10 +63,18 @@ exports.getGoogleDriveFiles = async (req, res) => {
     });
     const folders = folderResponse.data.files;
 
-    // 2) Para cada carpeta, listar sus archivos
+    const mimeTypes = [
+      'application/pdf',
+      'text/plain',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    ];
+
+    const mimeQuery = mimeTypes.map(type => `mimeType='${type}'`).join(' or ');
+
+    // 2) Para cada carpeta, listar sus archivos filtrados
     const results = await Promise.all(folders.map(async folder => {
       const filesResponse = await drive.files.list({
-        q: `'${folder.id}' in parents and mimeType='application/pdf' and trashed=false`,
+        q: `'${folder.id}' in parents and (${mimeQuery}) and trashed=false`,
         fields: 'nextPageToken, files(id, name, mimeType, modifiedTime)',
         spaces: 'drive',
       });

@@ -4,6 +4,7 @@ require('dotenv').config();
 
 const LOCAL_API_URL    = process.env.LOCAL_API_URL    || 'http://localhost:3001';
 const OPEN_WEBUI_TOKEN = process.env.OPEN_WEB_UI_TOKEN;
+const AUTH_HEADER      = { Authorization: `Bearer ${OPEN_WEBUI_TOKEN}` };
 
 // Mapeo DriveFolderID → KnowledgeBaseID
 const folderToKbMap = {
@@ -11,19 +12,22 @@ const folderToKbMap = {
 };
 
 async function syncDriveToOpenWebUI() {
-  // 1) Traer archivos de Drive
-  const driveRes = await axios.get(`${LOCAL_API_URL}/googleDrive/files`);
-  const driveData = driveRes.data.data;   // driveRes.data tiene { data: [ { folder, files: [...] }, … ] }
+  // 1) Traer listados
+  const [ driveRes, fileStoreRes, kbRes ] = await Promise.all([
+    axios.get(`${LOCAL_API_URL}/googleDrive/files`),
+    axios.get(`${LOCAL_API_URL}/archivos/all`, { headers: AUTH_HEADER }),
+    axios.get(`${LOCAL_API_URL}/basesConocimiento/all`, { headers: AUTH_HEADER })
+  ]);
 
-  // 2) Traer bases de conocimiento
-  const kbRes = await axios.get(`
-    ${LOCAL_API_URL}/basesConocimiento/all`,
-    { headers: { Authorization: `Bearer ${OPEN_WEBUI_TOKEN}` } }
-  );
+  const driveData = driveRes.data.data;
+  const fileStore = fileStoreRes.data;
   const knowledgeBases = kbRes.data;
 
-  // Variable para controlar modificaciones en los archivos. (Tiene que ser igual al cron)
-  const fiveMinAgo = Date.now() - 5 * 60 * 1000;
+  // Map nombre → ID en file store
+  const nameToFileId = new Map(fileStore.map(f => [ f.meta.name, f.id ]));
+
+  // Tiempo de corte para UPDATE (1 minuto atrás)
+  const oneMinAgo = Date.now() - 5 * 60 * 1000;
 
   for (const [folderId, kbId] of Object.entries(folderToKbMap)) {
     const driveEntry = driveData.find(d => d.folder.id === folderId) || { folder: { name: folderId }, files: [] };
@@ -34,7 +38,8 @@ async function syncDriveToOpenWebUI() {
     }
 
     const driveFiles = driveEntry.files;
-    const openFiles  = (kb.files||[]).map(f => ({
+    const openFiles = (kb.files||[]).map(f => ({
+      id:        f.id,               // <-- aquí preservas el ID
       name:      f.meta.name,
       updatedAt: f.updated_at * 1000
     }));
@@ -46,18 +51,32 @@ async function syncDriveToOpenWebUI() {
     const toRemove = openFiles.filter(f => !namesDrive.has(f.name));
     const toUpdate = driveFiles.filter(f => {
       if (!namesOpen.has(f.name)) return false;
-      return new Date(f.modifiedTime).getTime() > fiveMinAgo;
+      return new Date(f.modifiedTime).getTime() > oneMinAgo;
     });
 
+    // ADD: console.log
     toAdd.forEach(f => {
       console.log(`ADD    → "${driveEntry.folder.name}" → "${kb.name}" → ${f.name}`);
     });
+
+    // — UPDATE: console.log
     toUpdate.forEach(f => {
       console.log(`UPDATE → "${driveEntry.folder.name}" → "${kb.name}" → ${f.name}`);
     });
-    toRemove.forEach(f => {
-      console.log(`REMOVE → "${driveEntry.folder.name}" → "${kb.name}" → ${f.name}`);
-    });
+
+    // — REMOVE: desasociar de la KB (acción real)
+    for (const f of toRemove) {
+      console.log(`REMOVE – → Carpeta "${driveEntry.folder.name}" → KB "${kb.name}" → ${f.name}`);
+      try {
+        await axios.post(
+          `${LOCAL_API_URL}/basesConocimiento/${kbId}/file/remove`,
+          { file_id: f.id },
+          { headers: AUTH_HEADER }
+        );
+      } catch (err) {
+        console.error(`------- REMOVE ERROR "${f.name}":`, err.response?.data || err.message);
+      }
+    }
   }
 }
 
