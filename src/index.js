@@ -11,7 +11,8 @@ app.use(express.json());
 
 // Ruta
 const archivosRouter = require('./routes/archivosRouter');
-const basesConocimientoRouter = require('./routes/basesConocimientoRouter')
+const basesConocimientoRouter = require('./routes/basesConocimientoRouter');
+const googleDriveRouter = require('./routes/googleDriveRouter');
 
 // Swagger
 app.use(
@@ -26,6 +27,7 @@ app.get('/', (req, res) => {
 });
 app.use('/archivos', archivosRouter);
 app.use('/basesConocimiento', basesConocimientoRouter)
+app.use('/googleDrive', googleDriveRouter)
 
 app.listen(PORT, () => {
   console.log(`Servidor escuchando en puerto ${PORT}`);
