@@ -63,6 +63,28 @@ exports.getGoogleDriveFiles = async (req, res) => {
     });
     const folders = folderResponse.data.files;
 
+    const getFilesRecursive = async (parentId) => {
+      const filesResponse = await drive.files.list({
+        q: `'${parentId}' in parents and (${mimeQuery}) and trashed=false`,
+        fields: 'nextPageToken, files(id, name, mimeType, modifiedTime)',
+        spaces: 'drive',
+      });
+      const files = filesResponse.data.files || [];
+
+      const subFolders = await drive.files.list({
+        q: `'${parentId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`,
+        fields: 'nextPageToken, files(id, name)',
+        spaces: 'drive',
+      });
+
+      for (const folder of subFolders.data.files) {
+        const subFiles = await getFilesRecursive(folder.id);
+        files.push(...subFiles);
+      }
+
+      return files;
+    };
+
     const mimeTypes = [
       'application/pdf',
       'text/plain',
@@ -71,19 +93,15 @@ exports.getGoogleDriveFiles = async (req, res) => {
 
     const mimeQuery = mimeTypes.map(type => `mimeType='${type}'`).join(' or ');
 
-    // 2) Para cada carpeta, listar sus archivos filtrados
+    // 2) Obtener archivos de todas las carpetas, incluyendo subcarpetas
     const results = await Promise.all(folders.map(async folder => {
-      const filesResponse = await drive.files.list({
-        q: `'${folder.id}' in parents and (${mimeQuery}) and trashed=false`,
-        fields: 'nextPageToken, files(id, name, mimeType, modifiedTime)',
-        spaces: 'drive',
-      });
+      const files = await getFilesRecursive(folder.id);
       return {
         folder: {
           id: folder.id,
           name: folder.name
         },
-        files: filesResponse.data.files || []
+        files
       };
     }));
 
