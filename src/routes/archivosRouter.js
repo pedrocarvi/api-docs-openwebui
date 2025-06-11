@@ -1,12 +1,12 @@
 const express = require('express');
 const router  = express.Router();
-const { getFiles, getFileById, uploadFile }  = require('../controllers/archivosController');
+const { getFiles, getFileById, uploadFile, deleteFile }  = require('../controllers/archivosController');
 const multer  = require('multer');
 const storage = multer.memoryStorage();
 const upload  = multer({ storage });
 // Se puede usar para que se requiera token para llamar a algun endpoint
 // Se tiene que agregar como: router.get('/get-files', authenticateToken, getFiles);
-// const { authenticateToken } = require('../middlewares/auth');
+const { authenticateToken } = require('../middlewares/auth');
 
 /**
  * @swagger
@@ -39,7 +39,7 @@ const upload  = multer({ storage });
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.get('/all', getFiles);
+router.get('/all', authenticateToken, getFiles);
 
 /**
  * @swagger
@@ -95,7 +95,7 @@ router.get('/all', getFiles);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.post('/byId', getFileById);
+router.post('/byId', authenticateToken, getFileById);
 
 /**
  * @swagger
@@ -125,6 +125,42 @@ router.post('/byId', getFileById);
  *       401:
  *         description: Falta o es inválido el token
  */
-router.post('/upload', upload.single('file'), uploadFile);
+router.post('/upload', authenticateToken, upload.single('file'), uploadFile);
+
+/**
+ * @swagger
+ * /archivos/{fileId}:
+ *   delete:
+ *     summary: Elimina un archivo de Open WebUI por su ID
+ *     tags:
+ *       - Files
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: fileId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: UUID del archivo a eliminar
+ *     responses:
+ *       200:
+ *         description: Archivo eliminado correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       401:
+ *         description: Falta o es inválido el token
+ *       404:
+ *         description: Archivo no encontrado
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.delete('/:fileId', authenticateToken, deleteFile);
+
 
 module.exports = router;

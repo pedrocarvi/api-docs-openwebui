@@ -3,18 +3,18 @@ const FormData = require('form-data');
 
 exports.getFiles = async (req, res, next) => {
   try {
-    const token = process.env.OPEN_WEB_UI_TOKEN;
+    const token = req.owuiToken;
     if (!token) {
-      return res.status(500).json({ error: 'No está configurado OPEN_WEB_UI_TOKEN' });
+      return res.status(401).json({ error: 'No hay token en la petición' });
     }
 
     const baseUrl = process.env.OPEN_WEB_UI_BASE_URL || 'http://localhost:3000/api/v1';
-    const url     = `${baseUrl}/files/`;
+    const url = `${baseUrl}/files/`;
 
     const response = await axios.get(url, {
       headers: {
         'Authorization': `Bearer ${token}`,
-        'Accept'       : 'application/json'
+        'Accept': 'application/json'
       }
     });
 
@@ -36,18 +36,18 @@ exports.getFileById = async (req, res, next) => {
       return res.status(400).json({ error: 'Debe enviar fileId en el body' });
     }
 
-    const token = process.env.OPEN_WEB_UI_TOKEN;
+    const token = req.owuiToken;
     if (!token) {
       return res.status(500).json({ error: 'No está configurado OPEN_WEB_UI_TOKEN' });
     }
 
     const baseUrl = process.env.OPEN_WEB_UI_BASE_URL || 'http://localhost:3000/api/v1';
-    const url     = `${baseUrl}/files/${fileId}`;
+    const url = `${baseUrl}/files/${fileId}`;
 
     const response = await axios.get(url, {
       headers: {
         'Authorization': `Bearer ${token}`,
-        'Accept'       : 'application/json'
+        'Accept': 'application/json'
       }
     });
 
@@ -74,7 +74,7 @@ exports.uploadFile = async (req, res, next) => {
     }
 
     // 2. Leer token de .env
-    const token = process.env.OPEN_WEB_UI_TOKEN;
+    const token = req.owuiToken;
     if (!token) {
       return res.status(500).json({ error: 'No está configurado OPEN_WEB_UI_TOKEN' });
     }
@@ -82,23 +82,23 @@ exports.uploadFile = async (req, res, next) => {
     // 3. Armar el FormData con el buffer
     const form = new FormData();
     form.append('file', req.file.buffer, {
-      filename   : req.file.originalname,
+      filename: req.file.originalname,
       contentType: req.file.mimetype
     });
 
     // 4. URL CORRECTA de OWUI
     const baseUrl = process.env.OPEN_WEB_UI_BASE_URL || 'http://localhost:3000/api/v1';
-    const owuUrl  = `${baseUrl}/files/`;          // ← aquí está la clave
+    const owuUrl = `${baseUrl}/files/`;
 
     // 5. Enviar el POST
     const owuResponse = await axios.post(owuUrl, form, {
       headers: {
         ...form.getHeaders(),
         'Authorization': `Bearer ${token}`,
-        'Accept'       : 'application/json'
+        'Accept': 'application/json'
       },
       maxContentLength: Infinity,
-      maxBodyLength   : Infinity
+      maxBodyLength: Infinity
     });
 
     // 6. Devolver la respuesta de OWUI
@@ -115,5 +115,41 @@ exports.uploadFile = async (req, res, next) => {
     }
     // Otros errores (conexión, configuración, etc.)
     return next(err);
+  }
+};
+
+exports.deleteFile = async (req, res, next) => {
+  try {
+    const { fileId } = req.params;
+    if (!fileId) {
+      return res.status(400).json({ error: 'Debe enviar fileId en la ruta' });
+    }
+
+    const token = req.owuiToken;
+    if (!token) {
+      return res.status(500).json({ error: 'No está configurado OPEN_WEB_UI_TOKEN' });
+    }
+
+    const baseUrl = process.env.OPEN_WEB_UI_BASE_URL || 'http://localhost:3000/api/v1';
+    const url = `${baseUrl}/files/${fileId}`;
+
+    const response = await axios.delete(url, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json'
+      }
+    });
+
+    return res
+      .status(200)
+      .json({ message: 'Archivo eliminado correctamente' });
+
+  } catch (err) {
+    if (err.response) {
+      return res
+        .status(err.response.status)
+        .json(err.response.data);
+    }
+    next(err);
   }
 };

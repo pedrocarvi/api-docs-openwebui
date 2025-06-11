@@ -1,9 +1,8 @@
-// src/controllers/basesConocimientoController.js
 const axios = require('axios');
 
 exports.getKnowledgeBases = async (req, res, next) => {
   try {
-    const token = process.env.OPEN_WEB_UI_TOKEN;
+    const token = req.owuiToken;
     if (!token) {
       return res.status(500).json({ error: 'No está configurado OPEN_WEB_UI_TOKEN' });
     }
@@ -38,7 +37,7 @@ exports.addFileToKnowledge = async (req, res, next) => {
       return res.status(400).json({ error: 'Debe enviar id_knowledge en la ruta y file_id en el body' });
     }
 
-    const token = process.env.OPEN_WEB_UI_TOKEN;
+    const token = req.owuiToken;
     if (!token) {
       return res.status(500).json({ error: 'No está configurado OPEN_WEB_UI_TOKEN' });
     }
@@ -77,7 +76,7 @@ exports.deleteFileFromKnowledge = async (req, res, next) => {
       return res.status(400).json({ error: 'Debe enviar id_knowledge en la ruta y file_id en el body' });
     }
 
-    const token = process.env.OPEN_WEB_UI_TOKEN;
+    const token = req.owuiToken;
     if (!token) {
       return res.status(500).json({ error: 'No está configurado OPEN_WEB_UI_TOKEN' });
     }

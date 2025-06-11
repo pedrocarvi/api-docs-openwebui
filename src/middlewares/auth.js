@@ -1,5 +1,3 @@
-// Middlware opcional - por si las llamadas a esta api tienen que ser con token también
-// Por defecto no se utiliza en los endpoints - revisar archivosRouter para un ejemplo de como se podría usar :)
 require('dotenv').config();
 
 exports.authenticateToken = (req, res, next) => {
@@ -13,10 +11,15 @@ exports.authenticateToken = (req, res, next) => {
     return res.status(401).json({ error: 'Formato de Authorization inválido' });
   }
 
-  const validToken = process.env.OPEN_WEB_UI_TOKEN;
-  if (token !== validToken) {
-    return res.status(403).json({ error: 'Token no autorizado' });
-  }
+  // Si quisieras verificar la firma del JWT
+  // const jwt = require('jsonwebtoken');
+  // try {
+  //   req.user = jwt.verify(token, process.env.OPEN_WEB_UI_TOKEN);
+  // } catch (e) {
+  //   return res.status(403).json({ error: 'Token inválido' });
+  // }
 
+  // Guardamos el token para que los controllers lo usen
+  req.owuiToken = token;
   next();
 };

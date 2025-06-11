@@ -12,6 +12,14 @@ const options = {
     },
     tags: [
       {
+        name: 'Auth',
+        description: 'Conseguir token para consumir Open WebUI'
+      },
+      {
+        name: 'Files',
+        description: 'Ver, subir y eliminar archivos de Open WebUI'
+      },
+      {
         name: 'Knowledge',
         description: 'Operaciones relacionadas con tu Base de Conocimiento'
       },

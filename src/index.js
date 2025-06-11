@@ -10,6 +10,7 @@ app.use(cors());
 app.use(express.json());
 
 // Ruta
+const authOwuiRouter = require('./routes/authOwuiRouter')
 const archivosRouter = require('./routes/archivosRouter');
 const basesConocimientoRouter = require('./routes/basesConocimientoRouter');
 const googleDriveRouter = require('./routes/googleDriveRouter');
@@ -25,11 +26,12 @@ app.use(
 app.get('/', (req, res) => {
   res.send('API Archivos - Base conocimientos con Open WebUI. Revisar /api-docs para ver el SwaggerUI.');
 });
+app.use('/authOwui', authOwuiRouter)
 app.use('/archivos', archivosRouter);
 app.use('/basesConocimiento', basesConocimientoRouter)
 app.use('/googleDrive', googleDriveRouter)
 
-require('./cron/syncFiles');
+// require('./cron/syncFiles');
 
 app.listen(PORT, () => {
   console.log(`Servidor escuchando en puerto ${PORT}`);

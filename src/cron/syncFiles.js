@@ -27,6 +27,7 @@ const folderToKbMap = {
   '15oghZ0RAII5RjCqZY3i2cfgoSiMZw06o': 'ece42a50-67c8-4cd3-a406-fa21a96311ad'
 };
 
+// Funcion que sube un archivo a open webui
 async function uploadToOpenWebUI(fileName, fileBuffer) {
   const form = new FormData();
   form.append('file', fileBuffer, fileName);
@@ -38,6 +39,7 @@ async function uploadToOpenWebUI(fileName, fileBuffer) {
   return res.data.id;
 }
 
+// funcion que agrega archivo subido a una base de conocimiento 
 async function addFileToKB(kbId, fileId) {
   await axios.post(
     `${LOCAL_API_URL}/basesConocimiento/${kbId}/file/add`,
@@ -46,6 +48,7 @@ async function addFileToKB(kbId, fileId) {
   );
 }
 
+// funcion que elimina un archivo de una base de conocimeinto
 async function removeFileFromKB(kbId, fileId) {
   await axios.post(
     `${LOCAL_API_URL}/basesConocimiento/${kbId}/file/remove`,
@@ -54,6 +57,7 @@ async function removeFileFromKB(kbId, fileId) {
   );
 }
 
+// funcion que corre el cron
 async function syncDriveToOpenWebUI() {
   // 1) Traer listados
   const [ driveRes, fileStoreRes, kbRes ] = await Promise.all([

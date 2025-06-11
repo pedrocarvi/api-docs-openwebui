@@ -1,6 +1,7 @@
 const express = require('express');
 const router  = express.Router();
 const { getKnowledgeBases, addFileToKnowledge, deleteFileFromKnowledge }  = require('../controllers/basesConocimientoController');
+const { authenticateToken } = require('../middlewares/auth');
 
 /**
  * @swagger
@@ -33,7 +34,7 @@ const { getKnowledgeBases, addFileToKnowledge, deleteFileFromKnowledge }  = requ
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.get('/all', getKnowledgeBases);
+router.get('/all',authenticateToken, getKnowledgeBases);
 
 /**
  * @swagger
@@ -95,7 +96,7 @@ router.get('/all', getKnowledgeBases);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.post('/:id_knowledge/file/add', addFileToKnowledge);
+router.post('/:id_knowledge/file/add', authenticateToken, addFileToKnowledge);
 
 /**
  * @swagger
@@ -157,6 +158,6 @@ router.post('/:id_knowledge/file/add', addFileToKnowledge);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.post('/:id_knowledge/file/remove', deleteFileFromKnowledge);
+router.post('/:id_knowledge/file/remove', authenticateToken, deleteFileFromKnowledge);
 
 module.exports = router;
