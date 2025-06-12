@@ -4,8 +4,6 @@ const { getFiles, getFileById, uploadFile, deleteFile }  = require('../controlle
 const multer  = require('multer');
 const storage = multer.memoryStorage();
 const upload  = multer({ storage });
-// Se puede usar para que se requiera token para llamar a algun endpoint
-// Se tiene que agregar como: router.get('/get-files', authenticateToken, getFiles);
 const { authenticateToken } = require('../middlewares/auth');
 
 /**
@@ -43,29 +41,23 @@ router.get('/all', authenticateToken, getFiles);
 
 /**
  * @swagger
- * /archivos/byId:
+ * /archivos/{fileId}:
  *   post:
  *     summary: Obtiene la info de un archivo de Open WebUI por su ID
  *     tags:
  *       - Files
  *     security:
  *       - bearerAuth: []
- *     requestBody:
- *       description: ID del archivo a recuperar
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - fileId
- *             properties:
- *               fileId:
- *                 type: string
- *                 description: UUID del archivo
+ *     parameters:
+ *       - in: path
+ *         name: fileId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID del archivo
  *     responses:
  *       200:
- *         description: Metadata y contenido del archivo
+ *         description: Contenido del archivo
  *         content:
  *           application/json:
  *             schema:
@@ -95,7 +87,7 @@ router.get('/all', authenticateToken, getFiles);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.post('/byId', authenticateToken, getFileById);
+router.post('/:fileId', authenticateToken, getFileById);
 
 /**
  * @swagger
@@ -142,7 +134,7 @@ router.post('/upload', authenticateToken, upload.single('file'), uploadFile);
  *         schema:
  *           type: string
  *         required: true
- *         description: UUID del archivo a eliminar
+ *         description: ID del archivo a eliminar
  *     responses:
  *       200:
  *         description: Archivo eliminado correctamente

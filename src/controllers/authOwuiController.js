@@ -10,7 +10,6 @@ exports.userSignIn = async (email, password) => {
     return response.data;
   } catch (err) {
     console.error('[userSignIn] Error:', err);
-
     const errorDetail = err.response?.data?.detail || err.response?.data || err.message;
     throw new Error(errorDetail);
   }

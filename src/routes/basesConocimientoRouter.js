@@ -51,7 +51,7 @@ router.get('/all',authenticateToken, getKnowledgeBases);
  *         required: true
  *         schema:
  *           type: string
- *         description: UUID de la base de conocimiento
+ *         description: ID de la base de conocimiento
  *     requestBody:
  *       required: true
  *       content:
@@ -63,7 +63,7 @@ router.get('/all',authenticateToken, getKnowledgeBases);
  *             properties:
  *               file_id:
  *                 type: string
- *                 description: UUID del archivo previamente subido
+ *                 description: ID del archivo previamente subido
  *     responses:
  *       200:
  *         description: Respuesta de Open Web UI tras asociar el archivo
@@ -113,7 +113,7 @@ router.post('/:id_knowledge/file/add', authenticateToken, addFileToKnowledge);
  *         required: true
  *         schema:
  *           type: string
- *         description: UUID de la base de conocimiento
+ *         description: ID de la base de conocimiento
  *     requestBody:
  *       required: true
  *       content:
@@ -125,7 +125,7 @@ router.post('/:id_knowledge/file/add', authenticateToken, addFileToKnowledge);
  *             properties:
  *               file_id:
  *                 type: string
- *                 description: UUID del archivo previamente subido
+ *                 description: ID del archivo previamente subido
  *     responses:
  *       200:
  *         description: Respuesta de Open Web UI tras eliminar el archivo

@@ -1,5 +1,3 @@
-require('dotenv').config();
-
 exports.authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   if (!authHeader) {
@@ -11,15 +9,6 @@ exports.authenticateToken = (req, res, next) => {
     return res.status(401).json({ error: 'Formato de Authorization inválido' });
   }
 
-  // Si quisieras verificar la firma del JWT
-  // const jwt = require('jsonwebtoken');
-  // try {
-  //   req.user = jwt.verify(token, process.env.OPEN_WEB_UI_TOKEN);
-  // } catch (e) {
-  //   return res.status(403).json({ error: 'Token inválido' });
-  // }
-
-  // Guardamos el token para que los controllers lo usen
   req.owuiToken = token;
   next();
 };

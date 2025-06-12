@@ -16,6 +16,8 @@ OPEN_WEB_UI_BASE_URL=https://www.tuchat.com/api/v1
 ```
 OPEN_WEB_UI_TOKEN=
 
+req.owuiToken = process.env.OPEN_WEB_UI_TOKEN;
+
 ```
 
 ### Uso de la API para administrar los archivos de Open WebUI

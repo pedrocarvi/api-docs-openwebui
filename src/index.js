@@ -31,6 +31,7 @@ app.use('/archivos', archivosRouter);
 app.use('/basesConocimiento', basesConocimientoRouter)
 app.use('/googleDrive', googleDriveRouter)
 
+// CRON
 // require('./cron/syncFiles');
 
 app.listen(PORT, () => {
